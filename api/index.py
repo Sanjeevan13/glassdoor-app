@@ -209,10 +209,8 @@ def predict_sentiment_endpoint(req: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
-# Mount static web directory. Creates it if it doesn't exist yet
+# Mount static web directory.
 BASE_DIR = os.path.dirname(API_DIR)
 public_dir = os.path.join(BASE_DIR, "public")
-if not os.path.exists(public_dir):
-    os.makedirs(public_dir, exist_ok=True)
-
-app.mount("/", StaticFiles(directory=public_dir, html=True), name="static")
+if os.path.exists(public_dir):
+    app.mount("/", StaticFiles(directory=public_dir, html=True), name="static")
