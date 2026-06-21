@@ -956,16 +956,16 @@ function updateCategoryRadarChart(subRatingsA, subRatingsB = null) {
     });
   }
   
-  // Map category names to shorter versions to prevent label clipping on the sides
-  const categoryShortNames = {
-    'Work-Life Balance': 'Work-Life Balance',
-    'Culture & Values': 'Culture & Values',
-    'Diversity & Inclusion': 'Diversity & Incl.',
-    'Career Opportunities': 'Career Opp.',
-    'Compensation & Benefits': 'Comp. & Benefits',
-    'Senior Management': 'Senior Mgmt.'
+  // Map category names to multiline arrays to prevent label clipping on the sides
+  const categoryLabels = {
+    'Work-Life Balance': ['Work-Life', 'Balance'],
+    'Culture & Values': ['Culture &', 'Values'],
+    'Diversity & Inclusion': ['Diversity &', 'Inclusion'],
+    'Career Opportunities': ['Career', 'Opportunities'],
+    'Compensation & Benefits': ['Compensation', '& Benefits'],
+    'Senior Management': ['Senior', 'Management']
   };
-  const displayCategories = categories.map(cat => categoryShortNames[cat] || cat);
+  const displayCategories = categories.map(cat => categoryLabels[cat] || cat);
   
   const chartOptions = {
     series: series,
@@ -977,7 +977,15 @@ function updateCategoryRadarChart(subRatingsA, subRatingsB = null) {
     },
     plotOptions: {
       radar: {
-        size: 85 // Reduce radar radius slightly to give labels extra breathing room
+        size: 75 // Reduce radar radius slightly to give labels extra breathing room
+      }
+    },
+    grid: {
+      padding: {
+        left: 35,
+        right: 35,
+        top: 15,
+        bottom: 15
       }
     },
     stroke: { width: 2 },
