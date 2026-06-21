@@ -956,6 +956,17 @@ function updateCategoryRadarChart(subRatingsA, subRatingsB = null) {
     });
   }
   
+  // Map category names to shorter versions to prevent label clipping on the sides
+  const categoryShortNames = {
+    'Work-Life Balance': 'Work-Life Balance',
+    'Culture & Values': 'Culture & Values',
+    'Diversity & Inclusion': 'Diversity & Incl.',
+    'Career Opportunities': 'Career Opp.',
+    'Compensation & Benefits': 'Comp. & Benefits',
+    'Senior Management': 'Senior Mgmt.'
+  };
+  const displayCategories = categories.map(cat => categoryShortNames[cat] || cat);
+  
   const chartOptions = {
     series: series,
     chart: {
@@ -964,12 +975,17 @@ function updateCategoryRadarChart(subRatingsA, subRatingsB = null) {
       background: 'transparent',
       toolbar: { show: false }
     },
+    plotOptions: {
+      radar: {
+        size: 85 // Reduce radar radius slightly to give labels extra breathing room
+      }
+    },
     stroke: { width: 2 },
     fill: { opacity: 0.15 },
     markers: { size: 3 },
     colors: isCompareMode ? ['#6366f1', '#a855f7'] : ['#6366f1'],
     xaxis: {
-      categories: categories,
+      categories: displayCategories,
       labels: {
         style: {
           colors: Array(6).fill('#9ca3af'),

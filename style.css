@@ -462,6 +462,11 @@ body {
     grid-template-columns: 1.1fr 1.9fr;
   }
   
+  #dashboard-col-a,
+  #dashboard-col-b {
+    grid-column: 1 / 3;
+  }
+  
   .metric-card {
     grid-column: 1;
   }
@@ -1103,6 +1108,25 @@ body.compare-active .dashboard-grid {
 
 body.compare-active .radar-container-card {
   grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  body.compare-active #dashboard-col-a {
+    grid-column: 1;
+  }
+  body.compare-active #dashboard-col-b {
+    grid-column: 2;
+  }
+  body.compare-active .feedback-card#feedback-card-a {
+    grid-column: 1;
+  }
+  body.compare-active .feedback-card#feedback-card-b {
+    grid-column: 2;
+  }
+  body.compare-active .metric-card,
+  body.compare-active .chart-card {
+    grid-column: auto;
+  }
 }
 
 /* Double cards layout in compare mode columns */
