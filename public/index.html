@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glassdoor Insights Hub | Company Review Dashboard</title>
+  <meta name="description" content="Explore interactive company reviews, employee sentiment distributions, category ratings, and test custom review texts with our ML model.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- ApexCharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- SVG Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭐</text></svg>">
+</head>
+<body>
+  
+  <!-- Background Glow Accents -->
+  <div class="glow-bg glow-1"></div>
+  <div class="glow-bg glow-2"></div>
+  
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <div class="logo-icon"><i data-lucide="bar-chart-3"></i></div>
+        <div>
+          <h1>Glassdoor Insights Hub</h1>
+          <p class="subtitle">AI-Powered Employee Sentiment & Company Review Analytics</p>
+        </div>
+      </div>
+      
+      <!-- Company Search Autocomplete -->
+      <div class="search-container" id="search-wrapper">
+        <div class="search-box">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="company-search-input" placeholder="Search for a company..." autocomplete="off">
+          <button type="button" id="clear-search-btn" class="clear-btn" style="display: none;">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="autocomplete-dropdown" id="autocomplete-list" style="display: none;">
+          <!-- List items will be injected dynamically -->
+        </div>
+      </div>
+    </header>
+    
+    <main class="app-main">
+      <!-- Welcome / Empty State -->
+      <section class="welcome-card" id="welcome-section">
+        <div class="welcome-icon">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <h2>Welcome to the Insights Hub</h2>
+        <p>Type a company name in the search bar above to see its ratings, sentiment analysis, category breakdowns, and real pros vs cons.</p>
+        <div class="quick-suggest-wrapper">
+          <span class="suggest-label">Popular companies:</span>
+          <div class="suggest-tags" id="suggested-tags-container">
+            <!-- Dynamically populated tags -->
+          </div>
+        </div>
+      </section>
+      
+      <!-- Dashboard Content (Hidden by default) -->
+      <section class="dashboard-content" id="dashboard-section" style="display: none;">
+        
+        <!-- Header Info -->
+        <div class="company-profile-header">
+          <div>
+            <h2 id="company-title" class="company-title">Company Name</h2>
+            <p id="review-count-badge" class="review-count-badge">Based on 0 reviews</p>
+          </div>
+        </div>
+        
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+          
+          <!-- Rating Metric Card -->
+          <div class="card metric-card">
+            <h3 class="card-title"><i data-lucide="award"></i> Overall Rating</h3>
+            <div class="rating-display">
+              <span id="rating-number" class="rating-value">0.0</span>
+              <span class="rating-max">/ 5.0</span>
+            </div>
+            <div class="rating-stars" id="rating-stars-container">
+              <!-- Render stars -->
+            </div>
+            <p class="rating-footer">Average score from real employees</p>
+          </div>
+          
+          <!-- Sentiment Pie Chart Card -->
+          <div class="card chart-card">
+            <h3 class="card-title"><i data-lucide="pie-chart"></i> Sentiment Distribution</h3>
+            <div class="chart-wrapper">
+              <div id="sentiment-pie-chart"></div>
+            </div>
+          </div>
+          
+          <!-- Category Ratings Bar Chart Card -->
+          <div class="card category-card">
+            <h3 class="card-title"><i data-lucide="sliders"></i> Workplace Category Ratings</h3>
+            <div class="chart-wrapper">
+              <div id="category-bar-chart"></div>
+            </div>
+          </div>
+          
+          <!-- Employee Feedback List -->
+          <div class="card feedback-card">
+            <h3 class="card-title"><i data-lucide="message-square"></i> Real Employee Feedback</h3>
+            <div class="feedback-columns">
+              <div class="feedback-col pros-col">
+                <h4><i data-lucide="thumbs-up"></i> Top Pros</h4>
+                <ul id="pros-list-container" class="feedback-list">
+                  <!-- Injected pros -->
+                </ul>
+              </div>
+              
+              <div class="feedback-col cons-col">
+                <h4><i data-lucide="thumbs-down"></i> Top Cons</h4>
+                <ul id="cons-list-container" class="feedback-list">
+                  <!-- Injected cons -->
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </section>
+      
+      <!-- Sentiment Predictor Form Sandbox -->
+      <section class="card sandbox-section">
+        <div class="sandbox-header">
+          <div class="sandbox-logo">
+            <i data-lucide="terminal"></i>
+          </div>
+          <div>
+            <h2>🧪 Sentiment Predictor Sandbox</h2>
+            <p>Write your own mock review below to run it through our trained Logistic Regression classifier.</p>
+          </div>
+        </div>
+        
+        <form id="predictor-form" class="predictor-form">
+          <div class="form-grid">
+            <div class="input-group">
+              <label for="sandbox-pros"><i data-lucide="plus-circle" class="pro-label-icon"></i> Pros (What you like)</label>
+              <textarea id="sandbox-pros" placeholder="e.g. Flexible working hours, amazing culture, supportive management..." rows="4"></textarea>
+            </div>
+            
+            <div class="input-group">
+              <label for="sandbox-cons"><i data-lucide="minus-circle" class="con-label-icon"></i> Cons (What you dislike)</label>
+              <textarea id="sandbox-cons" placeholder="e.g. Long commutes, limited career path opportunities, low starting salary..." rows="4"></textarea>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" id="analyze-btn" class="btn btn-primary">
+              <span id="btn-text">Analyze Review Sentiment</span>
+              <span id="btn-loader" class="loader-spinner" style="display: none;"></span>
+            </button>
+          </div>
+        </form>
+        
+        <!-- Prediction Results -->
+        <div id="prediction-result-wrapper" class="prediction-result-wrapper" style="display: none;">
+          <div class="result-divider"></div>
+          <div class="result-container">
+            <div class="result-verdict">
+              <p class="result-label">Predicted Sentiment</p>
+              <h3 id="predicted-label-text">Positive</h3>
+            </div>
+            
+            <div class="result-chart">
+              <p class="result-label">Classifier Confidence Distribution</p>
+              <div id="prediction-confidence-chart"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <footer class="app-footer">
+      <p>Glassdor Insights Hub. Powered by Group 10  - Social Informatics</p>
+    </footer>
+  </div>
+
+  <!-- Custom JS Script -->
+  <script src="script.js"></script>
+</body>
+</html>
