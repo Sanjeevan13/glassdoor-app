@@ -10,12 +10,12 @@ import scipy
 from scipy.sparse import hstack
 import nltk
 
-# Determine directory paths relative to the file location
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_FILE = os.path.join(BASE_DIR, "glassdoor_website_database.csv")
-MODEL_FILE = os.path.join(BASE_DIR, "sentiment_model.pkl")
-VEC_PROS_FILE = os.path.join(BASE_DIR, "tfidf_vectorizer_pros.pkl")
-VEC_CONS_FILE = os.path.join(BASE_DIR, "tfidf_vectorizer_cons.pkl")
+# Determine directory paths relative to the file location (api folder)
+API_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(API_DIR, "glassdoor_website_database.csv")
+MODEL_FILE = os.path.join(API_DIR, "sentiment_model.pkl")
+VEC_PROS_FILE = os.path.join(API_DIR, "tfidf_vectorizer_pros.pkl")
+VEC_CONS_FILE = os.path.join(API_DIR, "tfidf_vectorizer_cons.pkl")
 
 # Initialize FastAPI App
 app = FastAPI(title="Glassdoor Company Review Dashboard API")
@@ -43,27 +43,21 @@ except Exception as e:
         "career_opp", "comp_benefits", "senior_mgmt"
     ])
 
-# Set up writable NLTK data directory (Vercel serverless has read-only filesystem except /tmp)
-nltk_data_dir = "/tmp/nltk_data"
-if not os.path.exists(nltk_data_dir):
-    os.makedirs(nltk_data_dir, exist_ok=True)
+# Set up local bundled NLTK data directory (pre-downloaded and unzipped)
+nltk_data_dir = os.path.join(API_DIR, "nltk_data")
 if nltk_data_dir not in nltk.data.path:
-    nltk.data.path.append(nltk_data_dir)
+    nltk.data.path.insert(0, nltk_data_dir)
 
-# Download NLTK packages if they don't exist
+# Load NLTK resources
 try:
-    if not os.path.exists(os.path.join(nltk_data_dir, "corpora", "stopwords")):
-        nltk.download("stopwords", download_dir=nltk_data_dir, quiet=True)
-    if not os.path.exists(os.path.join(nltk_data_dir, "corpora", "wordnet")):
-        nltk.download("wordnet", download_dir=nltk_data_dir, quiet=True)
-    
     from nltk.corpus import stopwords
     from nltk.stem import WordNetLemmatizer
     stop_words = set(stopwords.words("english"))
     lemmatizer = WordNetLemmatizer()
     nltk_loaded = True
+    print("Local NLTK data loaded successfully.")
 except Exception as e:
-    print(f"Error downloading NLTK libraries: {e}")
+    print(f"Error loading local NLTK libraries: {e}")
     nltk_loaded = False
     stop_words = set()
     lemmatizer = None
@@ -216,6 +210,7 @@ def predict_sentiment_endpoint(req: PredictRequest):
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
 # Mount static web directory. Creates it if it doesn't exist yet
+BASE_DIR = os.path.dirname(API_DIR)
 public_dir = os.path.join(BASE_DIR, "public")
 if not os.path.exists(public_dir):
     os.makedirs(public_dir, exist_ok=True)
