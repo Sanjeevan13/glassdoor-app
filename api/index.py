@@ -209,8 +209,6 @@ def predict_sentiment_endpoint(req: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
-# Mount static web directory.
+# Mount static web directory (located in the root directory for local dev)
 BASE_DIR = os.path.dirname(API_DIR)
-public_dir = os.path.join(BASE_DIR, "public")
-if os.path.exists(public_dir):
-    app.mount("/", StaticFiles(directory=public_dir, html=True), name="static")
+app.mount("/", StaticFiles(directory=BASE_DIR, html=True), name="static")
