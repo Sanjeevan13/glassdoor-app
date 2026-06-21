@@ -9,6 +9,7 @@ import joblib
 import scipy
 from scipy.sparse import hstack
 import nltk
+from collections import Counter
 
 # Determine directory paths relative to the file location (api folder)
 API_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -146,6 +147,27 @@ def get_summary(company: str = Query(..., description="Company name to search"))
         .tolist()
     )
     
+    # Extract keywords (frequent words excluding stopwords and generic words)
+    def extract_keywords(reviews_list, stop_words, exclude_words=None):
+        if not reviews_list:
+            return []
+        if exclude_words is None:
+            exclude_words = set()
+        words = []
+        for r in reviews_list:
+            clean = re.sub(r"[^a-zA-Z\s]", "", str(r)).lower().split()
+            for w in clean:
+                if w not in stop_words and len(w) > 3 and w not in exclude_words:
+                    words.append(w)
+        counter = Counter(words)
+        return [item[0] for item in counter.most_common(5)]
+
+    exclude = {"company", "work", "job", "good", "great", "bad", "employee", "employees", "get", "make", "lot", "like", "many", "much", "people", "would", "one"}
+    exclude.add(company.lower())
+    
+    pros_keywords = extract_keywords(pros_list, stop_words, exclude)
+    cons_keywords = extract_keywords(cons_list, stop_words, exclude)
+    
     return {
         "firm": company_df["firm"].iloc[0],
         "review_count": len(company_df),
@@ -153,7 +175,9 @@ def get_summary(company: str = Query(..., description="Company name to search"))
         "sub_ratings": sub_ratings,
         "sentiment_pct": sentiment_pct,
         "pros_list": [p.strip() for p in pros_list[:10]],  # top 10
-        "cons_list": [c.strip() for c in cons_list[:10]]   # top 10
+        "cons_list": [c.strip() for c in cons_list[:10]],   # top 10
+        "pros_keywords": pros_keywords,
+        "cons_keywords": cons_keywords
     }
 
 class PredictRequest(BaseModel):
@@ -202,9 +226,28 @@ def predict_sentiment_endpoint(req: PredictRequest):
                 for cls, val in zip(model.classes_, proba_values)
             }
 
+        # Calculate word weights (XAI) for pros and cons
+        pros_weights = {}
+        for w in pros_clean.split():
+            if w in vec_pros.vocabulary_:
+                idx = vec_pros.vocabulary_[w]
+                # Positive class coefficient minus Negative class coefficient
+                val = float(model.coef_[2][idx] - model.coef_[0][idx])
+                pros_weights[w] = round(val, 4)
+                
+        cons_weights = {}
+        for w in cons_clean.split():
+            if w in vec_cons.vocabulary_:
+                idx = vec_cons.vocabulary_[w]
+                shifted_idx = idx + len(vec_pros.get_feature_names_out())
+                val = float(model.coef_[2][shifted_idx] - model.coef_[0][shifted_idx])
+                cons_weights[w] = round(val, 4)
+
         return {
             "sentiment": str(prediction),
-            "probabilities": probabilities
+            "probabilities": probabilities,
+            "pros_weights": pros_weights,
+            "cons_weights": cons_weights
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")

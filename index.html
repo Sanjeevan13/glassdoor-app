@@ -40,20 +40,47 @@
         </div>
       </div>
       
-      <!-- Company Search Autocomplete -->
-      <div class="search-container" id="search-wrapper">
-        <div class="search-box">
-          <i data-lucide="search" class="search-icon"></i>
-          <input type="text" id="company-search-input" placeholder="Search for a company..." autocomplete="off">
-          <button type="button" id="clear-search-btn" class="clear-btn" style="display: none;">
-            <i data-lucide="x"></i>
-          </button>
+      <!-- Compare Action & Search Inputs -->
+      <div class="header-controls">
+        <div class="search-inputs-row">
+          <!-- Search Box A -->
+          <div class="search-container" id="search-wrapper-a">
+            <div class="search-box">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="company-search-input-a" placeholder="Search first company..." autocomplete="off">
+              <button type="button" id="clear-search-btn-a" class="clear-btn" style="display: none;">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <div class="autocomplete-dropdown" id="autocomplete-list-a" style="display: none;"></div>
+          </div>
+          
+          <!-- Search Box B (Hidden by default, shown in Compare Mode) -->
+          <div class="search-container" id="search-wrapper-b" style="display: none;">
+            <div class="search-box">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="company-search-input-b" placeholder="Search second company..." autocomplete="off">
+              <button type="button" id="clear-search-btn-b" class="clear-btn" style="display: none;">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <div class="autocomplete-dropdown" id="autocomplete-list-b" style="display: none;"></div>
+          </div>
         </div>
-        <div class="autocomplete-dropdown" id="autocomplete-list" style="display: none;">
-          <!-- List items will be injected dynamically -->
-        </div>
+        
+        <!-- Toggle Mode Button -->
+        <button type="button" id="compare-mode-toggle" class="btn btn-secondary compare-toggle-btn">
+          <i data-lucide="git-compare"></i>
+          <span id="compare-btn-text">Compare Mode</span>
+        </button>
       </div>
     </header>
+    
+    <!-- Recent Searches -->
+    <div class="recent-searches-bar" id="recent-searches-box" style="display: none;">
+      <span class="recent-label">Recent Searches:</span>
+      <div class="recent-tags" id="recent-tags-container"></div>
+    </div>
     
     <main class="app-main">
       <!-- Welcome / Empty State -->
@@ -62,7 +89,7 @@
           <i data-lucide="sparkles"></i>
         </div>
         <h2>Welcome to the Insights Hub</h2>
-        <p>Type a company name in the search bar above to see its ratings, sentiment analysis, category breakdowns, and real pros vs cons.</p>
+        <p id="welcome-description">Type a company name in the search bar above to see its ratings, sentiment analysis, category breakdowns, and real pros vs cons.</p>
         <div class="quick-suggest-wrapper">
           <span class="suggest-label">Popular companies:</span>
           <div class="suggest-tags" id="suggested-tags-container">
@@ -74,62 +101,156 @@
       <!-- Dashboard Content (Hidden by default) -->
       <section class="dashboard-content" id="dashboard-section" style="display: none;">
         
-        <!-- Header Info -->
-        <div class="company-profile-header">
-          <div>
-            <h2 id="company-title" class="company-title">Company Name</h2>
-            <p id="review-count-badge" class="review-count-badge">Based on 0 reviews</p>
+        <!-- Single Company Header Info -->
+        <div class="company-profile-header" id="single-company-header">
+          <div class="company-identity-wrapper">
+            <div id="company-logo-container-a" class="company-logo-avatar"></div>
+            <div>
+              <h2 id="company-title-a" class="company-title">Company Name</h2>
+              <p id="review-count-badge-a" class="review-count-badge">Based on 0 reviews</p>
+            </div>
+          </div>
+          <!-- Keywords tags -->
+          <div class="keyword-tags-outer">
+            <span class="keyword-label">Top Review Topics:</span>
+            <div class="keyword-tags-container" id="keywords-container-a"></div>
           </div>
         </div>
         
-        <!-- Main Dashboard Grid -->
-        <div class="dashboard-grid">
-          
-          <!-- Rating Metric Card -->
-          <div class="card metric-card">
-            <h3 class="card-title"><i data-lucide="award"></i> Overall Rating</h3>
-            <div class="rating-display">
-              <span id="rating-number" class="rating-value">0.0</span>
-              <span class="rating-max">/ 5.0</span>
+        <!-- Comparison Header Info (Hidden in Single View) -->
+        <div class="comparison-profile-header" id="comparison-company-header" style="display: none;">
+          <div class="comp-header-col">
+            <div class="company-identity-wrapper">
+              <div id="company-logo-container-comp-a" class="company-logo-avatar"></div>
+              <div>
+                <h2 id="company-title-comp-a" class="company-title">Company A</h2>
+                <p id="review-count-badge-comp-a" class="review-count-badge">Based on 0 reviews</p>
+              </div>
             </div>
-            <div class="rating-stars" id="rating-stars-container">
-              <!-- Render stars -->
-            </div>
-            <p class="rating-footer">Average score from real employees</p>
-          </div>
-          
-          <!-- Sentiment Pie Chart Card -->
-          <div class="card chart-card">
-            <h3 class="card-title"><i data-lucide="pie-chart"></i> Sentiment Distribution</h3>
-            <div class="chart-wrapper">
-              <div id="sentiment-pie-chart"></div>
+            <div class="keyword-tags-outer">
+              <div class="keyword-tags-container" id="keywords-container-comp-a"></div>
             </div>
           </div>
           
-          <!-- Category Ratings Bar Chart Card -->
-          <div class="card category-card">
-            <h3 class="card-title"><i data-lucide="sliders"></i> Workplace Category Ratings</h3>
-            <div class="chart-wrapper">
-              <div id="category-bar-chart"></div>
+          <div class="comp-vs-badge">VS</div>
+          
+          <div class="comp-header-col">
+            <div class="company-identity-wrapper">
+              <div id="company-logo-container-comp-b" class="company-logo-avatar"></div>
+              <div>
+                <h2 id="company-title-comp-b" class="company-title">Company B</h2>
+                <p id="review-count-badge-comp-b" class="review-count-badge">Based on 0 reviews</p>
+              </div>
+            </div>
+            <div class="keyword-tags-outer">
+              <div class="keyword-tags-container" id="keywords-container-comp-b"></div>
             </div>
           </div>
+        </div>
+        
+        <!-- Main Dashboard Layout Grid -->
+        <div class="dashboard-grid" id="dashboard-layout-grid">
           
-          <!-- Employee Feedback List -->
-          <div class="card feedback-card">
-            <h3 class="card-title"><i data-lucide="message-square"></i> Real Employee Feedback</h3>
-            <div class="feedback-columns">
-              <div class="feedback-col pros-col">
-                <h4><i data-lucide="thumbs-up"></i> Top Pros</h4>
-                <ul id="pros-list-container" class="feedback-list">
-                  <!-- Injected pros -->
-                </ul>
+          <!-- Column A (Company A Core Stats) -->
+          <div class="grid-column" id="dashboard-col-a">
+            <div class="card-pair-row">
+              <!-- Rating Metric Card -->
+              <div class="card metric-card">
+                <h3 class="card-title"><i data-lucide="award"></i> Overall Rating</h3>
+                <div class="rating-display">
+                  <span id="rating-number-a" class="rating-value">0.0</span>
+                  <span class="rating-max">/ 5.0</span>
+                </div>
+                <div class="rating-stars" id="rating-stars-container-a"></div>
+                <p class="rating-footer" id="rating-footer-a">Average score from real employees</p>
               </div>
               
-              <div class="feedback-col cons-col">
-                <h4><i data-lucide="thumbs-down"></i> Top Cons</h4>
-                <ul id="cons-list-container" class="feedback-list">
-                  <!-- Injected cons -->
-                </ul>
+              <!-- Sentiment Pie Chart Card -->
+              <div class="card chart-card">
+                <h3 class="card-title"><i data-lucide="pie-chart"></i> Sentiment</h3>
+                <div class="chart-wrapper">
+                  <div id="sentiment-pie-chart-a"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Column B (Company B Core Stats - Hidden in Single View) -->
+          <div class="grid-column" id="dashboard-col-b" style="display: none;">
+            <div class="card-pair-row">
+              <!-- Rating Metric Card -->
+              <div class="card metric-card">
+                <h3 class="card-title"><i data-lucide="award"></i> Overall Rating</h3>
+                <div class="rating-display">
+                  <span id="rating-number-b" class="rating-value">0.0</span>
+                  <span class="rating-max">/ 5.0</span>
+                </div>
+                <div class="rating-stars" id="rating-stars-container-b"></div>
+                <p class="rating-footer" id="rating-footer-b">Average score from real employees</p>
+              </div>
+              
+              <!-- Sentiment Pie Chart Card -->
+              <div class="card chart-card">
+                <h3 class="card-title"><i data-lucide="pie-chart"></i> Sentiment</h3>
+                <div class="chart-wrapper">
+                  <div id="sentiment-pie-chart-b"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Category Ratings Radar Chart Card (Unified) -->
+          <div class="card category-card radar-container-card">
+            <h3 class="card-title" id="radar-card-title"><i data-lucide="sliders"></i> Workplace Category Ratings</h3>
+            <div class="chart-wrapper">
+              <div id="category-radar-chart"></div>
+            </div>
+          </div>
+          
+          <!-- Employee Feedback List Company A -->
+          <div class="card feedback-card collapsible-card collapsed" id="feedback-card-a">
+            <div class="feedback-header-toggle" id="feedback-toggle-a">
+              <h3 class="card-title" id="feedback-title-a"><i data-lucide="message-square"></i> Real Employee Feedback</h3>
+              <div class="toggle-action-wrapper">
+                <span class="toggle-label" id="toggle-label-a">Show Reviews</span>
+                <i data-lucide="chevron-down" class="toggle-chevron" id="toggle-chevron-a"></i>
+              </div>
+            </div>
+            <div class="feedback-content-wrapper" id="feedback-content-a">
+              <div class="feedback-columns">
+                <div class="feedback-col pros-col">
+                  <h4><i data-lucide="thumbs-up"></i> Top Pros</h4>
+                  <ul id="pros-list-container-a" class="feedback-list"></ul>
+                </div>
+                
+                <div class="feedback-col cons-col">
+                  <h4><i data-lucide="thumbs-down"></i> Top Cons</h4>
+                  <ul id="cons-list-container-a" class="feedback-list"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Employee Feedback List Company B (Hidden in Single View) -->
+          <div class="card feedback-card collapsible-card collapsed" id="feedback-card-b" style="display: none;">
+            <div class="feedback-header-toggle" id="feedback-toggle-b">
+              <h3 class="card-title" id="feedback-title-b"><i data-lucide="message-square"></i> Real Employee Feedback</h3>
+              <div class="toggle-action-wrapper">
+                <span class="toggle-label" id="toggle-label-b">Show Reviews</span>
+                <i data-lucide="chevron-down" class="toggle-chevron" id="toggle-chevron-b"></i>
+              </div>
+            </div>
+            <div class="feedback-content-wrapper" id="feedback-content-b">
+              <div class="feedback-columns">
+                <div class="feedback-col pros-col">
+                  <h4><i data-lucide="thumbs-up"></i> Top Pros</h4>
+                  <ul id="pros-list-container-b" class="feedback-list"></ul>
+                </div>
+                
+                <div class="feedback-col cons-col">
+                  <h4><i data-lucide="thumbs-down"></i> Top Cons</h4>
+                  <ul id="cons-list-container-b" class="feedback-list"></ul>
+                </div>
               </div>
             </div>
           </div>
@@ -170,18 +291,38 @@
           </div>
         </form>
         
-        <!-- Prediction Results -->
+        <!-- Prediction & Explainable AI (XAI) Results -->
         <div id="prediction-result-wrapper" class="prediction-result-wrapper" style="display: none;">
           <div class="result-divider"></div>
-          <div class="result-container">
-            <div class="result-verdict">
-              <p class="result-label">Predicted Sentiment</p>
-              <h3 id="predicted-label-text">Positive</h3>
+          <div class="result-container-outer">
+            <div class="result-container">
+              <div class="result-verdict">
+                <p class="result-label">Predicted Sentiment</p>
+                <h3 id="predicted-label-text">Positive</h3>
+              </div>
+              
+              <div class="result-chart">
+                <p class="result-label">Classifier Confidence Distribution</p>
+                <div id="prediction-confidence-chart"></div>
+              </div>
             </div>
             
-            <div class="result-chart">
-              <p class="result-label">Classifier Confidence Distribution</p>
-              <div id="prediction-confidence-chart"></div>
+            <!-- XAI Word Highlighting -->
+            <div class="xai-explanation-box">
+              <h4 class="xai-title"><i data-lucide="sparkles"></i> Explainable AI (XAI) Keyword Feature Weights</h4>
+              <p class="xai-meta">Below is your text analyzed token-by-token. Words strongly contributing to a <strong>positive</strong> classification are highlighted in <span class="highlight-pos-legend">green</span>, while words contributing to a <strong>negative</strong> classification are highlighted in <span class="highlight-neg-legend">red</span>.</p>
+              
+              <div class="xai-columns">
+                <div class="xai-col">
+                  <h5>Pros Highlighted</h5>
+                  <div id="xai-pros-highlighted" class="xai-highlighted-text-block"></div>
+                </div>
+                
+                <div class="xai-col">
+                  <h5>Cons Highlighted</h5>
+                  <div id="xai-cons-highlighted" class="xai-highlighted-text-block"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
