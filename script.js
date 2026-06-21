@@ -1063,9 +1063,9 @@ function highlightTextXAI(rawText, weights) {
     const w = weights[clean];
     if (w !== undefined) {
       if (w > 0.08) {
-        return `<span class="highlight-word-pos" title="Weight: +${w.toFixed(3)}">${token}</span>`;
+        return `<span class="highlight-word-pos" data-tooltip="Weight: +${w.toFixed(3)}">${token}</span>`;
       } else if (w < -0.08) {
-        return `<span class="highlight-word-neg" title="Weight: ${w.toFixed(3)}">${token}</span>`;
+        return `<span class="highlight-word-neg" data-tooltip="Weight: ${w.toFixed(3)}">${token}</span>`;
       }
     }
     return token;

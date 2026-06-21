@@ -226,22 +226,27 @@ def predict_sentiment_endpoint(req: PredictRequest):
                 for cls, val in zip(model.classes_, proba_values)
             }
 
-        # Calculate word weights (XAI) for pros and cons
+        # Calculate word weights (XAI) for pros and cons mapping back to original words
         pros_weights = {}
-        for w in pros_clean.split():
-            if w in vec_pros.vocabulary_:
-                idx = vec_pros.vocabulary_[w]
-                # Positive class coefficient minus Negative class coefficient
-                val = float(model.coef_[2][idx] - model.coef_[0][idx])
-                pros_weights[w] = round(val, 4)
+        original_pros_words = clean_text(req.pros).split()
+        for orig_w in original_pros_words:
+            if orig_w not in stop_words:
+                lemmatized_w = lemmatizer.lemmatize(orig_w)
+                if lemmatized_w in vec_pros.vocabulary_:
+                    idx = vec_pros.vocabulary_[lemmatized_w]
+                    val = float(model.coef_[2][idx] - model.coef_[0][idx])
+                    pros_weights[orig_w] = round(val, 4)
                 
         cons_weights = {}
-        for w in cons_clean.split():
-            if w in vec_cons.vocabulary_:
-                idx = vec_cons.vocabulary_[w]
-                shifted_idx = idx + len(vec_pros.get_feature_names_out())
-                val = float(model.coef_[2][shifted_idx] - model.coef_[0][shifted_idx])
-                cons_weights[w] = round(val, 4)
+        original_cons_words = clean_text(req.cons).split()
+        for orig_w in original_cons_words:
+            if orig_w not in stop_words:
+                lemmatized_w = lemmatizer.lemmatize(orig_w)
+                if lemmatized_w in vec_cons.vocabulary_:
+                    idx = vec_cons.vocabulary_[lemmatized_w]
+                    shifted_idx = idx + len(vec_pros.get_feature_names_out())
+                    val = float(model.coef_[2][shifted_idx] - model.coef_[0][shifted_idx])
+                    cons_weights[orig_w] = round(val, 4)
 
         return {
             "sentiment": str(prediction),

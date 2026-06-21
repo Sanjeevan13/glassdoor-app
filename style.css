@@ -1374,6 +1374,9 @@ body.compare-active .card-pair-row {
   box-shadow: 0 0 6px rgba(16, 185, 129, 0.1);
   display: inline-block;
   margin: 0 1px;
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dashed rgba(16, 185, 129, 0.4);
 }
 
 .highlight-word-neg {
@@ -1385,5 +1388,58 @@ body.compare-active .card-pair-row {
   box-shadow: 0 0 6px rgba(244, 63, 94, 0.1);
   display: inline-block;
   margin: 0 1px;
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dashed rgba(244, 63, 94, 0.4);
+}
+
+/* Custom Tooltip Bubble */
+.highlight-word-pos::after,
+.highlight-word-neg::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f3f4f6;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+/* Tooltip Little Triangle Arrow */
+.highlight-word-pos::before,
+.highlight-word-neg::before {
+  content: '';
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.15) transparent transparent transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 1000;
+}
+
+/* Hover States to trigger Tooltip */
+.highlight-word-pos:hover::after,
+.highlight-word-neg:hover::after,
+.highlight-word-pos:hover::before,
+.highlight-word-neg:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
 }
 
